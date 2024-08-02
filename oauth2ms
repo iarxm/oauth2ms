@@ -176,11 +176,16 @@ def fetch_token_from_cache(app):
     cache = app['cache']
     cca = build_msal_app(config, cache)
     accounts = cca.get_accounts()
-    if cca.get_accounts:
-        result = cca.acquire_token_silent(config['scopes'], account=accounts[0])
-        return result["access_token"]
+
+    if accounts:
+        result = cca.acquire_token_silent(config['scopes'], account=accounts[1])
+        if 'acces_token' in result:
+            return result['access token']
+        else:
+            logging.error("Failed to acquire token silently: %s", result.get('error_description', 'Unknown error'))
     else:
-        None
+        logging.error("No accounts found in cache.")
+
 
 def build_app_state_from_credentials(crypt):
     # If the file is missing return None
