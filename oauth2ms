@@ -177,12 +177,18 @@ def fetch_token_from_cache(app):
     cca = build_msal_app(config, cache)
     accounts = cca.get_accounts()
 
+    print("accounts from cache: %s", accounts)
+
     if accounts:
-        result = cca.acquire_token_silent(config['scopes'], account=accounts[1])
-        if 'acces_token' in result:
-            return result['access token']
+        result = cca.acquire_token_silent(config['scopes'], account=accounts[0])
+        if result is None:
+            logging.error("Failed to acquire token from cache")
+            return None
+        if 'access_token' in result:
+            return result['access_token']
         else:
-            logging.error("Failed to acquire token silently: %s", result.get('error_description', 'Unknown error'))
+            logging.error("Failed to acquire access_token from cached data: %s", result.get('error_description', 'Unknown error'))
+            return None
     else:
         logging.error("No accounts found in cache.")
 
